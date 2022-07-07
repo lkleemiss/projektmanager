@@ -1,0 +1,109 @@
+{% load bootstrap4 %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}Projektmanager</title>
+    {% bootstrap_css %}
+    <link rel="stylesheet" type="text/css" href="{% static '/css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/css/circle.css' %}">
+    <link rel="icon" type="image/png" href="{% static '/images/favicon-32x32.png' %}">
+
+    {% bootstrap_javascript jquery='full' %}
+    <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
+    <script src="{% static '/js/base.js' %}"></script>
+    <script src="{% static '/js/project.js' %}"></script>
+</head>
+<body>
+
+<div class="wrapper">
+    <!-- Sidebar  -->
+    {% if request.user.is_authenticated %}
+        <nav id="sidebar" class="sticky-top">
+            <div class="sidebar-header">
+                <h3>Projekt Manager</h3>
+                <strong>PM</strong>
+            </div>
+
+            <ul class="list-unstyled components">
+                {% url 'dashboard' as url %}
+                <li class="{% if request.path == url %}active{% endif %} ">
+                    <a href="{{ url }}">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                {% url 'profile' as url %}
+                <li class="{% if request.path  == url %}active{% endif %} ">
+                    <a href="{{ url }}">
+                        <i class="fa-solid fa-user"></i>
+                        <span>Mein Profil</span>
+                    </a>
+                </li>
+                {% url 'projects' as url %}
+
+                {% if projects.count > 0 %}
+                    <li class="{% if request.path == url %}active{% endif %} nav-item dropdown d-flex flex-wrap">
+                        <a class="nav-link col-10" href="{{ url }}" aria-expanded="false">
+                            <i class="fas fa-copy"></i> <span>Projekte</span>
+                        </a>
+                        <a href="#dropdown-menu" id="dropdownCollapse" data-toggle="collapse" aria-expanded="false"
+                           class="dropdown-toggle col-2"></a>
+                        <ul id="dropdown-menu" class="collapse list-unstyled col-12 px-0">
+                            {% for project in projects|slice:"3" %}
+                                <li>
+                                    <a href="{% url 'project' project_id=project.id %}">{{ project.title }}</a>
+                                </li>
+                            {% endfor %}
+                            {% if projects.count > 3 %}
+                                <li>
+                                    <a href="{{ url }}">Weitere Projekte</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="{% if request.path  == url %}active{% endif %} ">
+                        <a class="nav-link" href="{{ url }}" aria-expanded="false">
+                            <i class="fas fa-copy"></i> <span>Projekte</span>
+                        </a>
+                    </li>
+                {% endif %}
+                <li>
+                    <a class="" href="{% url 'logout' %}"><i class="fa-solid fa-arrow-right-from-bracket"></i><span>Abmelden</span></a>
+                </li>
+            </ul>
+        </nav>
+    {% endif %}
+
+    <div id="content">
+        <!-- Navbar  -->
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container-fluid">
+                {% if request.user.is_authenticated %}
+                    <button type="button" id="sidebarCollapse" class="btn btn-info">
+                        <i class="fas fa-align-left"></i>
+                    </button>
+                {% endif %}
+                {% block breadcrumb %}
+                {% endblock %}
+            </div>
+        </nav>
+
+        <!-- Page Content  -->
+        <section class="main_content">
+            {% if messages %}
+                {% for message in messages %}
+                {% endfor %}
+            {% endif %}
+            {% bootstrap_messages %}
+
+            {% block content %}
+            {% endblock %}
+        </section>
+    </div>
+</div>
+</body>
+</html>

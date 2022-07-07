@@ -1,0 +1,35 @@
+{% extends 'core/base.html' %}
+{% load bootstrap4 %}
+
+{% block title %} Neues Projekt | {% endblock %}
+{% block breadcrumb %}
+    <nav class="ml-auto" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active"><a href="{% url 'projects' %}">Projekte</a></li>
+            <li class="breadcrumb-item" aria-current="page">Neues Projekt</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="addproject-view">
+        <div class="container-box">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <h1>Neues Projekt</h1>
+                    </div>
+                </div>
+                <hr>
+                <form action="" enctype="multipart/form-data" method="post">
+                    {% csrf_token %}
+                    {% bootstrap_form form%}
+                    <div class="alert alert-info" id="team-text" style="display:none" role="alert">
+                        Nachdem du das Projekt erstellt hast kannst du deine Team-Mitglieder hinzufügen.
+                    </div>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

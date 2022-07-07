@@ -1,0 +1,39 @@
+{% load bootstrap4 %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}ProjectX</title>
+    {% bootstrap_css %}
+    <link rel="stylesheet" type="text/css" href="{% static '/css/style.css' %}">
+
+    {% bootstrap_javascript jquery='full' %}
+    <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
+    <script src="{% static '/js/base.js' %}"></script>
+</head>
+<body>
+
+<div class="wrapper public">
+    <div id="content">
+        <!-- Page Content  -->
+        <section class="main_content">
+            <div class="container-fluid">
+                {% if messages %}
+                    {% for message in messages %}
+                        <!-- now in settings -->
+                        <!--<div class="alert alert-info" role="alert">{{ message }}</div>-->
+                    {% endfor %}
+                {% endif %}
+                {% bootstrap_messages %}
+
+                {% block content %}
+                {% endblock %}
+            </div>
+        </section>
+    </div>
+</div>
+
+</body>
+</html>

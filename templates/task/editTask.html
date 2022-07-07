@@ -1,0 +1,103 @@
+{% extends 'core/base.html' %}
+{% load bootstrap4 %}
+
+{% block title %} Aufgabe: {{ task.title }} | {% endblock %}
+{% block breadcrumb %}
+    <nav class="ml-auto" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active"><a href="{% url 'projects' %}">Projekte</a></li>
+            <li class="breadcrumb-item active"><a
+                    href="{% url 'project' project_id=project.id %}">Projekt: {{ project.title }}</a></li>
+            <li class="breadcrumb-item active">
+                <a href="{% url 'task' project_id=project.id task_id=task.id %}">Aufgabe: {{ task.title }}</a>
+            </li>
+            <li class="breadcrumb-item" aria-current="page">Bearbeiten</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="edittask-view">
+        <div class="container-box">
+            <div class="container-fluid">
+                <div class="row header">
+                    <div class="col-12">
+                        <h1>Aufgabe: {{ task.title }}</h1>
+                    </div>
+                </div>
+                <hr/>
+                <form action="" enctype="multipart/form-data" method="post" class="form mt-3">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {% bootstrap_field form.title %}
+                    </div>
+                    <div class="form-group">
+                        {% bootstrap_field form.description %}
+                    </div>
+                    {% if project.members.count > 1 %}
+                        <div class="form-row">
+                            <div class="form-group col-12 col-md-6">
+                                <label for="resp_member_id">Zuständige Person</label>
+                                <select class="form-control" name="resp_member_id" id="resp_member_id">
+                                    <option value="">Zuständige Person wählen</option>
+                                    {% for member in project.members.all %}
+                                        <option value="{{ member.id }}"
+                                                {% if member == task.responsible_user %}selected="selected"{% endif %}>{{ member.username }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            {% bootstrap_field form.deadline_date %}
+                        </div>
+                        <div class="form-group col-md-6">
+                            {% bootstrap_field form.deadline_time %}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        {% bootstrap_field form.checked %}
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-8">
+                            <button class="btn btn-outline-secondary">
+                                <a class="deletetask_modal_btn" data-toggle="modal" data-id="{{ task.id }}"
+                                   data-target="#deletetask_modal">
+                                    Löschen
+                                </a>
+                            </button>
+                        </div>
+                        <div class="form-group col-md-4 text-right">
+                            <button type="button" class="btn btn-outline-secondary"><a
+                                    href="{% url 'task' project_id=project.id task_id=task.id %}">Abbrechen</a></button>
+                            <button type="submit" class="btn btn-primary">Speichern</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deletetask_modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Aufgabe löschen</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">x</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-desc">Möchtest du die Aufgabe wirklich löschen?<br/>Die Aktion ist nicht
+                        widerrufbar.</p>
+                </div>
+                <div class="modal-footer">
+                    <button name="deletetask_form" class="btn btn-primary"><a
+                            href="{% url 'delete_task' project_id=project.id task_id=task.id %}">Ja</a></button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Nein</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

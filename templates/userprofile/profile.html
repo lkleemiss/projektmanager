@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+
+{% block title %} Profil | {% endblock %}
+
+{% block content %}
+    <div class="profile-view">
+        <div class="container-box">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-8">
+                        {% if userprofil.user == user %}
+                            <h1>Mein Profil</h1>
+                        {% else %}
+                            <h1>User: {% firstof userprofil.user.get_full_name userprofil.user.get_username %}</h1>
+                        {% endif %}
+                    </div>
+                    {% if userprofil.user == user %}
+                        <div class="col-4 text-right">
+                            <button type="button" class="btn btn-primary">
+                                <a class="" href="{% url 'edit_profile' %}">Profil bearbeiten</a>
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-4">
+                        <img src="{{ userprofil.get_image }}" alt="..." class="rounded-circle" height="200" width="200">
+                    </div>
+                    <div class="col-md-8 row">
+                        <div class="col-12">
+                            <p><strong>Vorname:</strong> {{ userprofil.user.first_name }}</p>
+                            <p><strong>Nachname:</strong> {{ userprofil.user.last_name }}</p>
+                            <p><strong>E-Mail:</strong> {{ userprofil.user.email }}</p>
+                            <p><strong>Telefon:</strong> {% if userprofil.phone %}{{ userprofil.phone }} {% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,510 @@
+{% extends 'core/base.html' %}
+{% load bootstrap4 %}
+
+{% block title %} Projekt: {{ project.title }} | {% endblock %}
+{% block breadcrumb %}
+    <nav class="ml-auto" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active"><a href="{% url 'projects' %}">Projekte</a></li>
+          <li class="breadcrumb-item" aria-current="page">Projekt: {{ project.title }}</li>
+      </ol>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="project-view">
+        <div class="container-box">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-6">
+                        <h1>Projekt: {{ project.title }}</h1>
+                    </div>
+                    <div class="col-6 text-right">
+                        {% if project.manager == request.user %}
+                            <button type="button" class="btn btn-outline-secondary deleteproject_modal_btn btn-lg" data-toggle="modal" data-target="#deleteproject_modal" data-name="manager">Projekt löschen</button>
+                            <button type="button" class="btn btn-outline-secondary btn-lg">
+                                <a href="{% url 'project_edit' project_id=project.id %} ">Projekt bearbeiten</a>
+                            </button>
+                        {% else %}
+                            <button type="button" class="btn btn-outline-secondary deleteproject_modal_btn btn-lg" data-toggle="modal" data-target="#deleteproject_modal" data-name="member">Projekt verlassen</button>
+                        {% endif %}
+                        <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#createtask_modal">Neue Aufgabe</button>
+                    </div>
+                </div>
+                <hr>
+                <section class="project-details">
+                    <div class="row">
+                    {% if  project.team %}
+                        <div class="col-md-3">
+                             <p class="text-secondary mb-0">Manager</p>
+                             <p class="h3">
+                                 {% if project.manager.first_name or project.manager.last_name%}
+                                     {{ project.manager.first_name }} {{ project.manager.last_name }}
+                                {% else %}
+                                     {{ project.manager.email }}
+                                {% endif %}
+                             </p>
+                        </div>
+                    {% endif %}
+                        <div class="col-md-2">
+                            <p class="text-secondary mb-0">Status</p>
+                            <div class="status {{ project.status }}">{{ project.get_status_display }}</div>
+                        </div>
+                        <div class="col-6 {% if  project.team %}col-md-2{% else %}col-md-4{% endif %}">
+                            <p class="text-secondary mb-0">Deadline</p>
+                            <p class="h3">
+                                {% if project.deadline_date%}
+                                    <span class="{% if today|date:"Y-m-d" >= project.deadline_date|date:"Y-m-d" and not project.status == 'finished' and not project.status == 'closed' %}overdue{% endif %}">
+                                        {{ project.deadline_date }}
+                                    </span>
+                                {% else %}
+                                    -
+                                {% endif %}
+
+                            </p>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <p class="text-secondary mb-0">Fortschritt</p>
+                            <p class="h3">{{ task_progress }}%</p>
+                        </div>
+                     {% if  project.team %}
+                          <div class="col-md-3">
+                            <p class="text-secondary mb-0">Mitglieder</p>
+                            {%  for member in project.members.all %}
+                                <a href="{% url 'user_profile' userprofile_id=member.userprofile.user.id %}">
+                                  <img class="rounded-circle" width="50" height="50"  src="{{ member.userprofile.get_image }}"/>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    </div>
+                    {% if  project.description %}
+                        <hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <h2>Beschreibung</h2>
+                                {{ project.description |linebreaks  }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                </section>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-8">
+                <div class="container-box">
+                    <div class="container-fluid">
+                        <section class="project_tasks">
+                            <div class="row">
+                                <div class="col-8">
+                                    <h2>Aufgaben</h2>
+                                </div>
+                                <div class="col-4 text-right">
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createtask_modal">Neue Aufgabe</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                {% if project.tasks.count == 0%}
+                                    <div class="alert alert-info" role="alert">Es sind noch keine Aufgaben angelegt worden.</div>
+                                {% else %}
+                                    <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Titel</th>
+                                            <th scope="col">Deadline</th>
+                                            <th scope="col">Aktionen</th>
+                                            <th scope="col" class=""><i class="fa-solid fa-check"></i></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for task in project.tasks.all %}
+                                        <tr  {% if task.checked %}class="checked"{% endif %}>
+                                            <td>
+                                                <p>
+                                                    <a class="" href="{%  url 'task' project_id=project.id task_id=task.id %}">
+                                                        {{ task.title }}
+                                                    </a>
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <p>
+                                                    {% if task.deadline_date %}
+                                                        <span class="task_deadline {% if today|date:"Y-m-d" >= task.deadline_date|date:"Y-m-d" and not task.checked %}overdue{% endif %}">
+                                                            {{ task.deadline_date }}
+                                                            {% if task.deadline_time %}
+                                                                - {{ task.deadline_time }} Uhr
+                                                            {% endif %}
+                                                                {% if task.deadline_time %}
+                                                                    <span class="text-secondary"></span>
+                                                                {% endif %}
+                                                        </span>
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <a href="{%  url 'task' project_id=project.id task_id=task.id %}">
+                                                    <i class="fa-regular fa-eye"></i>
+                                                </a>
+                                                <a href="{%  url 'edit_task' project_id=project.id task_id=task.id %}">
+                                                    <i class="fa-regular fa-pen-to-square"></i>
+                                                </a>
+                                                <a href="{% url 'delete_task' project_id=project.id task_id=task.id %}">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <div class="form-check">
+                                                    <input class="form-check-input task-update" type="checkbox" value="" data-id="{{ task.id }}" {% if task.checked %}checked{% endif %}>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                  </tbody>
+                                </table>
+                                {% endif %}
+                            </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="container-box">
+                    <div class="container-fluid">
+                        <section class="project_time">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h2>Zeit tracken</h2>
+                                    <div class="timer-wrapper d-flex align-items-center">
+                                        <button id="button-start" class="col-2 {% if active_time_entry %}tracking{% endif %}"><i class="fa-solid fa-play"></i></button>
+                                        <div class="col-10 text-center">
+                                            <div class="row justify-content-center">
+                                                <div class="text-right col-3 px-0">
+                                                    <span id="hours"> {% if active_time_hours %}{{ active_time_hours }}{% else %}00{% endif %}
+                                                    </span>h
+                                                </div>
+                                                <div class="col-4 px-0">
+                                                     <span id="minutes">{% if active_time_minutes %}{{ active_time_minutes }}{% else %}00{% endif %}</span>min
+                                                </div>
+                                                <div class="text-left col-3 px-0 align-items-end small-text">
+                                                    <span id="seconds">{% if active_time_seconds %}{{ active_time_seconds }}{% else %}00{% endif %}</span>sec
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right mt-3 ">
+                                        <button class="btn btn-outline-primary" id="button-reset">Reset</button>
+                                        <button type="submit" class="btn btn-primary" id="time_entry_save" data-id="{{ active_time_entry.id }}" name="time_tracking">Speichern</button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                <div class="container-box">
+                    <div class="container-fluid">
+                        <section class="project_time">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h2>Zeit nachtragen</h2>
+
+                                    <form action="" method="post" class="form mt-3">
+                                        {% csrf_token %}
+                                        <div class="form-row">
+                                             <div class="form-group col-6">
+                                                <label for="hours">Stunden</label>
+                                                <select name="hours" class="custom-select">
+                                                    <option value="0">0 Stunden</option>
+                                                    {% for i in "x"|rjust:"10" %}
+                                                        <option value="{{ forloop.counter }}">{{ forloop.counter }} Stunden</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label for="minutes">Minuten</label>
+                                                <select name="minutes" class="custom-select">
+                                                    <option value="0">0 min</option>
+                                                    {% for i in "x"|rjust:"59" %}
+                                                        <option value="{{ forloop.counter }}">{{ forloop.counter }} min</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="date">Datum</label>
+                                            <input type="date" class="form-control" id="id_date" name="date" value="{{ today|date:'Y-m-d' }}"/>
+                                        </div>
+                                        <div class="text-right">
+                                            <button type="submit" name="timeentry_form" class="btn btn-primary">Speichern</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                <div class="container-box">
+                    <div class="container-fluid">
+                        <section class="project_time">
+                            <div class="row align-items-end">
+                                <div class="col-12 col-md-6 col-xl-8">
+                                    <h2>Getrackte Zeiten</h2>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4 text-right more-link">
+                                    <a href="#" class="text-primary">Alle ansehen</a>
+                                </div>
+                                <div class="col-12">
+                                    {% if project.time_entries.all %}
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Datum</th>
+                                                    <th>User</th>
+                                                    <th>Zeit</th>
+                                                    <th>Aktionen</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for entry in project.time_entries.all|dictsort:"start_time" %}
+                                                    <tr>
+                                                        <td>{{ entry.date }}</td>
+                                                        <td>{% firstof entry.created_by.get_full_name entry.created_by.username %}</td>
+                                                        <td>{{ entry.time_in_min }} min</td>
+                                                        <td class="text-right">
+                                                            <a href="{% url 'timeentry_edit' project_id=project.id time_entry_id=entry.id %}">
+                                                                <i class="fa-regular fa-pen-to-square"></i>
+                                                            </a>
+                                                            <a href="{% url 'timeentry_delete' project_id=project.id time_entry_id=entry.id %}">
+                                                                <i class="fa-solid fa-xmark"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <th colspan="2">Gesamtzeit</th>
+                                                    <th colspan="2">{{ tracked_time }}</th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    {% else%}
+                                        <div class="alert alert-info" role="alert">Es sind noch keine Zeiten angelegt worden.</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="modals">
+        <div class="modal fade" id="deleteproject_modal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">x</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="modal-desc"></p>
+                        <form action="" method="post" class="form mt-3">
+                            {% csrf_token %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="deleteproject_form" class="btn btn-primary">Ja</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Nein</button>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="createtask_modal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Neue Aufgabe</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                          <form action="" enctype="multipart/form-data" method="post" class="form mt-3">
+                              {% csrf_token %}
+                              {% bootstrap_form createtask_form %}
+
+                          {% if project.members.count > 1 %}
+                              <div class="form-group">
+                                    <label for="resp_member_id">Zuständige Person wählen</label>
+                                    <select  class="form-control" name="resp_member_id" id="resp_member_id">
+                                        <option value="">Zuständige Person wählen</option>
+                                        {% for member in project.members.all %}
+                                            <option value="{{ member.id }}">{{ member.username }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                          {% endif %}
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Abbrechen</button>
+                        <button type="submit" name="createtask_form" class="btn btn-primary">Speichern</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        $(window).on("load",function(){
+            /* ------- TIMER ------- */
+            var seconds = document.getElementById("seconds").innerHTML;
+            var minutes = document.getElementById("minutes").innerHTML;
+            var hours = document.getElementById("hours").innerHTML;
+
+            var appendSeconds = document.getElementById("seconds");
+            var appendMinutes = document.getElementById("minutes");
+            var appendHours = document.getElementById("hours");
+
+            var Interval;
+
+            function startTimer(){
+                seconds++;
+                if(seconds < 9){
+                    appendSeconds.innerHTML =  "0" + seconds;
+                }
+                if(seconds > 9){
+                    appendSeconds.innerHTML = seconds;
+                }
+                if(seconds > 59){
+                    minutes++;
+                    appendMinutes.innerHTML = "0" + minutes;
+                    seconds = 0;
+                    appendSeconds.innerHTML = "0" + seconds;
+                }
+                if(minutes > 9){
+                    appendMinutes.innerHTML = minutes;
+                }
+                if(minutes > 59){
+                    hours++;
+                    appendHours.innerHTML = "0" + hours;
+                    minutes = 0;
+                    appendMinutes.innerHTML = "0" + minutes;
+                }
+                if(hours > 9){
+                    appendHours.innerHTML = hours;
+                }
+            }
+
+            if($('#button-start').hasClass("tracking")){
+                console.log("teshhhht")
+                clearInterval(Interval);
+                Interval = setInterval(startTimer, 1000);
+                $('#button-start').find('.svg-inline--fa').removeClass("fa-play").addClass("fa-pause");
+            }
+
+            $('#button-start').on('click', function () {
+                $(this).toggleClass("tracking");
+                if( $(this).hasClass("tracking")){
+                    clearInterval(Interval);
+                    Interval = setInterval(startTimer, 1000);
+                    $(this).find('.svg-inline--fa').removeClass("fa-play").addClass("fa-pause");
+                } else{
+                    clearInterval(Interval);
+                    $(this).find('.svg-inline--fa').removeClass("fa-pause").addClass("fa-play")
+                }
+             });
+
+             $('#button-reset').on('click', function () {
+                clearInterval(Interval);
+                seconds = "00";
+                minutes = "00"
+                hours = "00";
+                appendSeconds.innerHTML = seconds;
+                appendMinutes.innerHTML = minutes;
+                appendHours.innerHTML = hours;
+            });
+
+             $('#time_entry_save').on('click', function () {
+                 clearInterval(Interval);
+                 $('#button-start').toggleClass("tracking");
+                 $('#button-start').find('.svg-inline--fa').removeClass("fa-pause").addClass("fa-play")
+                 seconds = "00";
+                 minutes = "00"
+                 hours = "00";
+                 appendSeconds.innerHTML = seconds;
+                 appendMinutes.innerHTML = minutes;
+                 appendHours.innerHTML = hours;
+             });
+        });
+
+        $('.task-update').change(function () {
+            $(this).closest('tr').toggleClass('checked');
+            test= $(this).closest('tr').find('taskdeadline');
+            test.toggleClass('overdue')
+            console.log(test.text())
+            console.log("Test")
+            task_id = $(this).data("id");
+            $.ajax({
+                type: 'POST',
+                url: "/projekt/" + {{ project.id }} + '/' + task_id + '/update',
+                data: {
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                },
+            });
+        });
+
+        $('#time_entry_save').on('click', function () {
+            hours = $('#hours').text()
+            seconds = $('#seconds').text()
+            minutes = $('#minutes').text()
+            if (seconds < "59" && minutes == "00"){
+                minutes = 1;
+            }
+            time_entry_id = $('#time_entry_save').data("id");
+            $.ajax({
+                type: 'POST',
+                url: "/projekt/" + {{ project.id }} + '/neue-zeit',
+                data: {
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    hours: hours,
+                    minutes: minutes,
+                    seconds: seconds,
+                    id: time_entry_id,
+                },
+                success: function (){
+                    window.location.href = window.location.pathname
+                },
+            })
+        });
+
+        $('#button-start').on('click', function () {
+            if (!$(this).hasClass("tracking")){
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/projekt/' + {{ project.id }} + '/start-tracking',
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                    },
+                    success: function(response) {
+                        $('#time_entry_save').data('id', response);
+                    }
+                });
+            }
+        });
+     </script>
+
+
+{% endblock %}

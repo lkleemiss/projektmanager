@@ -1,0 +1,292 @@
+{% extends 'core/base.html' %}
+{% load bootstrap4 %}
+
+{% block title %} Dashboard | {% endblock %}
+
+{% block content %}
+    <div id="dashboard-view">
+        <section id="tasks">
+            <div class="row">
+                <div class="col-12 col-md-3">
+                    <div class="container-box bg-primary">
+                        <div class="container-fluid">
+                            <p class="h3">
+                                {% if tasks_todo %}
+                                    {{ tasks_todo.count }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </p>
+                            <p class="text-secondary mb-0">Offene Aufgaben</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-3">
+                    <div class="container-box bg-secondary">
+                        <div class="container-fluid">
+                            <p class="h3">
+                                {% if tasks_overdue %}
+                                    {{ tasks_overdue.count }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </p>
+                            <p class="text-secondary mb-0">Überfällige Aufgaben</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-3">
+                    <div class="container-box">
+                        <div class="container-fluid">
+                            <p class="h3">
+                                {% if tasks_done %}
+                                    {{ tasks_done.count }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </p>
+                            <p class="text-secondary mb-0">Erledigte Aufgaben</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-3">
+                    <div class="container-box">
+                        <div class="container-fluid">
+                            <p class="h3">
+                                {% if tasks %}
+                                    {{ tasks.count }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </p>
+                            <p class="text-secondary mb-0">Aufgaben insgesamt</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-10">
+                    <div class="container-box">
+                        <div class="container-fluid">
+                            <h2>Aktuelle Aufgaben</h2>
+                            <hr>
+                            <div class="row">
+                                <div class="col-12 col-md-3 task-column">
+                                    <p><strong>Überfällig</strong></p>
+                                    <ul>
+                                        {% for task in tasks_overdue %}
+                                            <li>
+                                                <a class=""
+                                                   href="{% url 'task' project_id=task.project.id task_id=task.id %}">
+                                                    {{ task.title }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+
+                                </div>
+                                <div class="col-12 col-md-3 task-column">
+                                    <p><strong>Heute</strong></p>
+                                    <ul>
+                                        {% for task in tasks_today %}
+                                            <li>
+                                                <a class=""
+                                                   href="{% url 'task' project_id=task.project.id task_id=task.id %}">
+                                                    {{ task.title }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <p><strong>Morgen</strong></p>
+                                    <ul>
+                                        {% for task in tasks_tomorrow %}
+                                            <li>
+                                                <a class=""
+                                                   href="{% url 'task' project_id=task.project.id task_id=task.id %}">
+                                                    {{ task.title }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <p><strong>Demnächst</strong></p>
+                                    <ul>
+                                        {% for task in tasks_upcoming %}
+                                            <li>
+                                                <a class=""
+                                                   href="{% url 'task' project_id=task.project.id task_id=task.id %}">
+                                                    {{ task.title }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="container-box">
+                        <div class="container-fluid">
+                            <div class="progress-circle my-2 d-flex justify-content-center">
+                                <div class="c100 p{{ tasks_progress }}">
+                                    <span>{{ tasks_progress }}%</span>
+                                    <div class="slice">
+                                        <div class="bar"></div>
+                                        <div class="fill"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-secondary mb-0 text-center">Aufgaben Statistik</p>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="projects">
+            <div class="row">
+                <div class="col-12 col-md-4">
+                    <div class="container-box bg-primary">
+                        <div class="container-fluid">
+                            <p class="h3">
+                                {% if projects_current %}
+                                    {{ projects_current.count }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </p>
+                            <p class="text-secondary mb-0">Aktive Projekte</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="container-box">
+                        <div class="container-fluid">
+                            <p class="h3">
+                                {% if projects_completed %}
+                                    {{ projects_completed.count }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </p>
+                            <p class="text-secondary mb-0">Beendete Projekte</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="container-box">
+                        <div class="container-fluid">
+                            <p class="h3">
+                                {% if projects %}
+                                    {{ projects.count }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </p>
+                            <p class="text-secondary mb-0">Projekte insgesamt</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-10">
+                    <div class="container-box">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-8">
+                                    <h2>Aktuelle Projekte</h2>
+                                </div>
+                                <div class="col-4 text-right">
+                                    <button type="button" class="btn btn-primary">
+                                        <a href="{% url 'projects' %}">Alle Projekte</a>
+                                    </button>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-12">
+                                    <table class="table table-hover">
+                                        <thead>
+                                        <tr>
+                                            <th scope="col">Titel</th>
+                                            <th scope="col">Deadline</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Mitglieder</th>
+                                            <th scope="col">Fortschritt</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for project in projects_current|slice:"3" %}
+                                            <tr>
+                                                <td>
+                                                    <a class="" href="{% url 'project' project_id=project.id %}">
+                                                        {{ project.title }}
+                                                        {% if project.manager == request.user and project.team == True %}
+                                                            <div class="tag">Team</div>
+                                                        {% elif project.team == True %}
+                                                            <div class="tag">Team-Mitglied</div>
+                                                        {% endif %}
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    {% if project.deadline_date %}
+                                                        {{ project.deadline_date }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="status {{ project.status }}">{{ project.get_status_display }}</div>
+                                                </td>
+                                                <td class="">
+                                                    {% for member in project.members.all %}
+                                                        <a href="{% url 'user_profile' userprofile_id=member.userprofile.user.id %}">
+                                                            <img class="rounded-circle" width="50" height="50"
+                                                                 src="{{ member.userprofile.get_image }}"/>
+                                                        </a>
+                                                    {% endfor %}
+                                                </td>
+                                                <td class="align-middle">
+                                                    <div class="progress">
+                                                        <div class="progress-bar" role="progressbar"
+                                                             style="width: {{ project.progress_percent }}%;"
+                                                             aria-valuenow="{{ project.progress_percent }}"
+                                                             aria-valuemin="0"
+                                                             aria-valuemax="100">{{ project.progress_percent }}%
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="container-box">
+                        <div class="container-fluid">
+                            <p class="h3"><i class="fa-solid fa-stopwatch"></i> {{ hours_today }}h {{ minutes_today }}min
+                            </p>
+                            <p class="text-secondary mb-0">Arbeitszeit heute</p>
+                        </div>
+                    </div>
+                    <div class="container-box">
+                        <div class="container-fluid">
+                            <p class="h3"><i class="fa-solid fa-stopwatch"></i> {{ hours_total }}h {{ minutes_total }}min
+                            </p>
+                            <p class="text-secondary mb-0">Arbeitszeit gesamt</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'core/base.html' %}
+{% load bootstrap4 %}
+
+{% block title %} Aufgabe: {{ task.title }} | {% endblock %}
+{% block breadcrumb %}
+    <nav class="ml-auto" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active"><a href="{% url 'projects' %}">Projekte</a></li>
+            <li class="breadcrumb-item active"><a
+                    href="{% url 'project' project_id=project.id %}">Projekt: {{ project.title }}</a></li>
+            <li class="breadcrumb-item" aria-current="page">
+                <a href="{% url 'task' project_id=project.id task_id=task.id %}">Aufgabe: {{ task.title }}</a>
+            </li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="edittask-view">
+        <div class="container-box">
+            <div class="container-fluid">
+                <div class="row header">
+                    <div class="col-8">
+                        <h1>Aufgabe: {{ task.title }}</h1>
+                    </div>
+                    <div class="col-4 text-right">
+                        <button type="button" class="btn btn-primary btn-lg">
+                            <a href="{% url 'edit_task' project_id=project.id task_id=task.id %}">
+                                Bearbeiten
+                            </a>
+                        </button>
+                    </div>
+                </div>
+                <hr/>
+                <div class="row">
+                    {% if task.description %}
+                        <div class="col-12">
+                            <p><strong>Beschreibung:</strong></p>
+                            {{ task.description|linebreaks }}
+                        </div>
+                    {% endif %}
+                    <div class="col-12">
+                        <p>
+                            <strong>Projekt:</strong>
+                            {{ task.project.title }}
+                        </p>
+                    </div>
+                    <div class="col-12">
+                        <p>
+                            <strong>Erstellt am:</strong>
+                            {{ task.created_at }}
+                        </p>
+                    </div>
+                {% if task.project.members.count > 1 %}
+                    <div class="col-12">
+                            <p>
+                                <strong>Zuständige Person:</strong>
+                                {% if task.responsible_user %}
+                                    {% firstof task.responsible_user.get_full_name task.responsible_user.get_username %}
+                                    {% if task.responsible_user == request.user %}
+                                        (Du)
+                                    {% endif %}
+                                {% else %} -
+                                {% endif %}
+                            </p>
+                        </div>
+                {% endif %}
+                    <div class="col-12">
+                        <p>
+                           <strong>Deadline:</strong>
+                            {% if task.deadline_date %}
+                                 <span class="{% if today|date:"Y-m-d" >= task.deadline_date|date:"Y-m-d" and not task.checked%}overdue font-weight-bold{% endif %}">{{ task.deadline_date }}
+                                    {% if task.deadline_time %}
+                                        | {{ task.deadline_time }} Uhr
+                                    {% endif %}
+                                 </span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-12">
+                        <p>
+                            <strong>Erledigt:</strong>
+                            {% if task.checked %}
+                                Ja
+                            {% else %}
+                                Nein
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

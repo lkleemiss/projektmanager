@@ -1,0 +1,103 @@
+{% extends 'core/base.html' %}
+{% load bootstrap4 %}
+
+{% block title %} Profil | {% endblock %}
+
+{% block content %}
+    <div class="projects-view">
+        <div class="container-box">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-8">
+                        <h1>Meine Projekte</h1>
+                    </div>
+                    <div class="col-4 text-right">
+                        <button type="button" class="btn btn-primary">
+                            <a href="{% url 'project_add' %}">Neues Projekt</a>
+                        </button>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+            <div class="col-12">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Titel</th>
+                            <th scope="col" class="text-center">Deadline</th>
+                            <th scope="col" class="text-center">Status</th>
+                            <th scope="col" class="text-right pr-5">Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for project in projects %}
+                        <tr>
+                          <td>
+                              <a class="" href="{% url 'project' project_id=project.id  %}">
+                                  {{ project.title }}
+                                  {% if project.manager == request.user and project.team == True %}
+                                      <div class="tag">Team</div>
+                                  {% elif project.team == True %}
+                                      <div class="tag">Team-Mitglied</div>
+                                  {% endif %}
+                              </a>
+                          </td>
+                          <td class="text-center">
+                              {% if project.deadline_date %}
+                                  <span class="{% if today|date:"Y-m-d" >= project.deadline_date|date:"Y-m-d" and not project.status == 'finished' and not project.status == 'closed' %}overdue{% endif %}">                                        {{ project.deadline_date }}
+                                   </span>
+                              {% else %}
+                                  -
+                              {% endif %}
+                          </td>
+                          <td class="text-center">
+                              <div class="status {{ project.status }}">{{ project.get_status_display }}</div>
+                          </td>
+                          <td colspan="2" class="text-right pr-5">
+                              {% if project.manager == request.user %}
+                                  <a href="{% url 'project_edit' project_id=project.id %}">
+                                      <i class="fa-regular fa-pen-to-square"></i>
+                                  </a>
+                              {% endif %}
+                              <a class="deleteproject_modal_btn" data-toggle="modal" data-name="{% if project.manager == request.user %}manager{% else %}member{% endif %}" data-id="{{ project.id }}" data-target="#deleteproject_modal">
+                                  <i class="fa-solid fa-xmark"></i>
+                              </a>
+                          </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+
+            </div>
+        </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="modals">
+        <div class="modal fade" id="deleteproject_modal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">x</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="modal-desc"></p>
+                        <form action="" method="post" class="form mt-3">
+                            {% csrf_token %}
+                            <input type="hidden" id="project_id" name="project_id" value="">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="deleteproject_form" class="btn btn-primary">Ja</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Nein</button>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

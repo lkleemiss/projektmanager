@@ -1,0 +1,36 @@
+{% extends 'core/base_no_nav.html' %}
+
+{% block title %} Home | {% endblock %}
+
+{% block content %}
+    <div id="dashboard-view">
+        <div class="container-box">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <h1>Willkommen beim Projektmanager</h1>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <h2>Beschreibung zur der Web-Anwendung</h2>
+                        <p>
+                            Mit dieser Webanwendung kannst du deine Projekte und Aufgaben planen und deine jeweilige Arbeitszeit für das Projekt tracken.
+                            Lege Deadlines fest, schau dir deinen Projektfortschritt an und arbeite mit anderen im Team zusammen.
+                        </p>
+                        <button type="button" class="btn btn-outline-primary mr-3">
+                        <a href="{% url 'register'  %}">
+                             Registrieren
+                        </a>
+                    </button>
+                    <button type="button" class="btn btn-primary">
+                        <a href="{% url 'login'  %}">Login</a>
+                    </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
